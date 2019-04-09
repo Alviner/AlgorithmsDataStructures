@@ -5,7 +5,7 @@ class DynArray
 public:
     int count;
     int capacity;
-    int* array;  // хранит неотрицательные значения
+    int* array;
 
     DynArray()
     {
@@ -29,7 +29,7 @@ public:
 
     int get_item(int index)
     {
-        if (index < 0 or index >= this->capacity) {
+        if (index < 0 or index >= this->count) {
             throw "Index out of bounds";
         }
         return this->array[index];
@@ -51,31 +51,24 @@ public:
             throw "Index out of bounds";
         }
 
-        if (this->count == index) {
-            this->append(value);
-            return;
-        }
+        this->append(-1);
 
-        this->append(0);
-
-        for (int i = this->count; i > 0; i --) {
-            if (i > index) {
-                this->array[i] = this->array[i - 1];
-            } else if (i == index) {
-                this->array[i] = value;
-            }
+        for (int i = this->count; i > index; --i) {
+			 this->array[i] = this->array[i - 1];
         }
+		this->array[index] = value;
     }
 
     void remove(int index) // O(n)
     {
-        if (index < 0 or index > this->count) {
+        if (index < 0 or index >= this->count) {
             throw "Index out of bounds";
         }
 
-        for (int i = index; i < this->count - 1; i++) {
-            this->array[i] = this->array[i + 1];
-        }
+        for (int i = index; i < this->count; ++i)
+		{
+			this->array[i] = this->array[i + 1];
+		}
         --this->count;
 
         if (2 * this->count < this->capacity) {
