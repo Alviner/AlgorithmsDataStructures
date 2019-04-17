@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <typeinfo.h>
+#include <typeinfo>
 
 template<class T>
 class Node {
