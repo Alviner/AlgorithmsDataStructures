@@ -7,10 +7,10 @@ public:
     char **slots;
 
     HashTable(int sz, int stp) {
-        size = sz;
-        step = stp;
-        slots = new char *[size];
-        for (int i = 0; i < size; i++) slots[i] = nullptr;
+        this->size = sz;
+        this->step = stp;
+        this->slots = new char *[this->size];
+        for (int i = 0; i < this->size; i++) this->slots[i] = nullptr;
     }
 
     int hashFun(char *value) {
@@ -20,7 +20,7 @@ public:
         int hash_value = 0;
 
         for (int i = 0; value[i] != 0; i++) {
-            hash_value += int(value[i]);
+            hash_value += (int)value[i];
         }
         return hash_value % this->size;
     }
@@ -34,12 +34,12 @@ public:
         int limit = this->step * (this->size / this->step);
         for (int i = 0; i < limit; ++i) {
             while (hash_key < this->size) {
-                if (slots[hash_key] == nullptr) {
+                if (this->slots[hash_key] == nullptr) {
                     return hash_key;
                 }
                 hash_key += this->step;
             }
-            hash_key = hash_key - this->size;
+            hash_key -= this->size;
         }
         return -1;
     }
@@ -56,7 +56,7 @@ public:
     }
 
     int find(char *value) {
-        int hash_key = this->seekSlot(value);
+        int hash_key = this->hashFun(value);
 
         if (hash_key == -1) {
             return -1;
@@ -70,13 +70,13 @@ public:
                 }
                 hash_key += this->step;
             }
-            hash_key = hash_key - this->size;
+            hash_key -= this->size;
         }
 
         return -1;
     }
 
-    static int is_equal_strings(char *first, char *second) {
+    static int is_equal_strings(const char *first, const char *second) {
         int size_first = 0;
         int size_second = 0;
         for (int i = 0; first[i] != 0; i++) {
