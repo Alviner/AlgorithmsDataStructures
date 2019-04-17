@@ -65,7 +65,7 @@ public:
         int limit = this->step * (this->size / this->step);
         for (int i = 0; i < limit; ++i) {
             while (hash_key < this->size) {
-                if (this->slots[hash_key] != nullptr && is_equal_strings(this->slots[hash_key], value) == 1) {
+                if (this->slots[hash_key] != nullptr && HashTable::is_equal_strings(this->slots[hash_key], value) == 1) {
                     return hash_key;
                 }
                 hash_key += this->step;
@@ -76,7 +76,7 @@ public:
         return -1;
     }
 
-    int is_equal_strings(char *first, char *second) {
+    static int is_equal_strings(char *first, char *second) {
         int size_first = 0;
         int size_second = 0;
         for (int i = 0; first[i] != 0; i++) {
