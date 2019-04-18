@@ -28,7 +28,7 @@ public:
     void put(char *value) {
         int hash_key = this->seekSlot(value);
 
-        if (find(value) != -1) {
+        if (this->find(value) != -1) {
             return;
         }
 
@@ -162,8 +162,7 @@ public:
         if (hash_key == -1) {
             return -1;
         }
-        int limit = this->slots_step * (this->slots_size / this->slots_step);
-        for (int i = 0; i < limit; ++i) {
+        for (int i = 0; i < this->slots_step + 1; ++i) {
             while (hash_key < this->slots_size) {
                 if (this->slots[hash_key] == nullptr) {
                     return hash_key;
@@ -182,9 +181,7 @@ public:
         if (hash_key == -1) {
             return -1;
         }
-
-        int limit = this->slots_step * (this->slots_size / this->slots_step);
-        for (int i = 0; i < limit; ++i) {
+        for (int i = 0; i < this->slots_step + 1; ++i) {
             while (hash_key < this->slots_size) {
                 if (this->slots[hash_key] != nullptr && PowerSet::is_equal_strings(this->slots[hash_key], value) == 1) {
                     return hash_key;
