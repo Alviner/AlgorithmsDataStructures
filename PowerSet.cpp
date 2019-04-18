@@ -41,7 +41,7 @@ public:
                 if (this->slots[i] != nullptr) {
                     new_slots[k++] = this->slots[i];
                 }
-            };
+            }
             delete[] this->slots;
             this->slots = new_slots;
             this->slots_size = new_size;
