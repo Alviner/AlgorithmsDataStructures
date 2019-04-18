@@ -61,6 +61,21 @@ public:
         if (hash_key != -1) {
             delete this->slots[hash_key];
             this->slots[hash_key] = nullptr;
+            if (2 * this->size() < this->slots_size) {
+                int new_size = 2 * this->slots_size / 3;
+                new_size = new_size > 5 ? new_size : 5;
+                char **new_slots = new char *[new_size];
+                for (int i = 0; i < new_size; i++) new_slots[i] = nullptr;
+                int k = 0;
+                for (int i = 0; i < this->slots_size; i++) {
+                    if (this->slots[i] != nullptr) {
+                        new_slots[k++] = this->slots[i];
+                    }
+                };
+                delete[] this->slots;
+                this->slots = new_slots;
+                this->slots_size = new_size;
+            }
             return true;
         }
         return false;
