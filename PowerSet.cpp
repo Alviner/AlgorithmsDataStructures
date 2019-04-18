@@ -8,8 +8,8 @@ public:
     char **slots;
 
     PowerSet() {
-        this->slots_size = 1;
-        this->slots_step = 1;
+        this->slots_size = 5;
+        this->slots_step = 3;
         this->slots = new char *[this->slots_size];
 
         for (int i = 0; i < this->slots_size; i++) this->slots[i] = nullptr;
@@ -28,19 +28,24 @@ public:
     void put(char *value) {
         int hash_key = this->seekSlot(value);
 
-        if (this->find(value) != -1) {
+        if (find(value) != -1) {
             return;
         }
 
         if (hash_key == -1) {
-            char **new_slots = new char *[this->slots_size + 1];
-            for (int i = 0; i < this->slots_size; i++) new_slots[i] = this->slots[i];
-            for (int i = this->slots_size; i < this->slots_size + 1; i++) new_slots[i] = nullptr;
+            int new_size = this->slots_size * 2 + 1;
+            char **new_slots = new char *[new_size];
+            for (int i = 0; i < new_size; i++) new_slots[i] = nullptr;
+            int k = 0;
+            for (int i = 0; i < this->slots_size; i++) {
+                if (this->slots[i] != nullptr) {
+                    new_slots[k++] = this->slots[i];
+                }
+            };
             delete[] this->slots;
             this->slots = new_slots;
-            this->slots_size++;
-            hash_key = this->seekSlot(value);
-            this->slots[hash_key] = value;
+            this->slots_size = new_size;
+            this->put(value);
         } else {
             this->slots[hash_key] = value;
         }
@@ -115,7 +120,7 @@ public:
     }
 
     bool is_subset(PowerSet *set2) {
-        for (int i = 0; i < set2->size(); i++) {
+        for (int i = 0; i < set2->slots_size; i++) {
             if (set2->slots[i] != nullptr) {
                 if (!this->get(set2->slots[i])) {
                     return false;
@@ -123,6 +128,18 @@ public:
             }
         }
         return true;
+    }
+
+    int hashFun(char *value) {
+        if (value == nullptr) {
+            return -1;
+        }
+        int hash_value = 0;
+
+        for (int i = 0; value[i] != 0; i++) {
+            hash_value += (int) value[i];
+        }
+        return hash_value % this->slots_size;
     }
 
     int seekSlot(char *value) {
@@ -144,6 +161,7 @@ public:
         return -1;
     }
 
+
     int find(char *value) {
         int hash_key = this->hashFun(value);
 
@@ -154,8 +172,7 @@ public:
         int limit = this->slots_step * (this->slots_size / this->slots_step);
         for (int i = 0; i < limit; ++i) {
             while (hash_key < this->slots_size) {
-                if (this->slots[hash_key] != nullptr &&
-                    PowerSet::is_equal_strings(this->slots[hash_key], value) == 1) {
+                if (this->slots[hash_key] != nullptr && PowerSet::is_equal_strings(this->slots[hash_key], value) == 1) {
                     return hash_key;
                 }
                 hash_key += this->slots_step;
@@ -164,18 +181,6 @@ public:
         }
 
         return -1;
-    }
-
-    int hashFun(char *key) {
-        if (key == nullptr) {
-            return -1;
-        }
-        int hash_value = 0;
-
-        for (int i = 0; key[i] != 0; i++) {
-            hash_value += (int) key[i];
-        }
-        return hash_value % this->slots_size;
     }
 
     static int is_equal_strings(const char *first, const char *second) {
