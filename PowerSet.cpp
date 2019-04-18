@@ -59,7 +59,6 @@ public:
         int hash_key = this->find(value);
 
         if (hash_key != -1) {
-            delete this->slots[hash_key];
             this->slots[hash_key] = nullptr;
             if (2 * this->size() < this->slots_size) {
                 int new_size = 2 * this->slots_size / 3;
