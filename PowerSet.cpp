@@ -123,7 +123,7 @@ public:
             return this;
         }
 
-        for (int i = 0; i < this->size(); i++) {
+        for (int i = 0; i < this->slots_size; i++) {
             if (this->slots[i] != nullptr) {
                 if (!set2->get(this->slots[i])) {
                     res_set->put(this->slots[i]);
