@@ -48,26 +48,23 @@ public:
         return res;
     }
 
-    void GetAllNodes(SimpleTreeNode **list) {
-        int start_index = 0;
-        if (this->Parent != nullptr) {
-            start_index = this->Parent->level * MAX_CHILD;
+    void GetAllNodes(SimpleTreeNode **list, int index = 0) {
+        for (int i = 0; i < MAX_CHILD; i++) {
+            if (list[index + i] == nullptr) {
+                index += i;
+                list[index] = this;
+                break;
+            }
         }
 
-        bool has_passes = false;
-
         for (int i = 0; i < MAX_CHILD; i++) {
-            if (list[start_index + i] == nullptr && !has_passes) {
-                list[start_index + i] = this;
-                has_passes = true;
-            }
             if (this->Children[i] != nullptr) {
-                this->Children[i]->GetAllNodes(list);
+                this->Children[i]->GetAllNodes(list, index);
             }
         }
     }
-    int LeavesNumber()
-    {
+
+    int LeavesNumber() {
         int res = 0;
         if (this->Children[0] == nullptr) res++;
 
@@ -78,6 +75,16 @@ public:
         return res;
     }
 
+    int Count() {
+        int res = 1;
+        for (int i = 0; i < MAX_CHILD; ++i)
+            if (this->Children[i] != nullptr) {
+                res += this->Children[i]->Count();
+            }
+        return res;
+
+    }
+
 
 };
 
@@ -85,12 +92,16 @@ class SimpleTree {
 public:
     SimpleTreeNode *Root; // корень, может быть NULL
     int levels;
+    int count;
 
     SimpleTree(SimpleTreeNode *root) {
         this->Root = root;
         this->levels = 0;
+        this->count = 0;
+
         if (this->Root != nullptr) {
             this->levels = 1;
+            this->count = 1;
         }
 
     }
@@ -108,25 +119,35 @@ public:
         if (ParentNode != nullptr) {
             ParentNode->AddChild(NewChild);
         } else {
-            this->Root = NewChild;
+            if (this->Root != nullptr) {
+                SimpleTreeNode *node = this->Root;
+                this->DeleteNode(node);
+                this->Root = NewChild;
+                NewChild->AddChild(node);
+            } else {
+                this->Root = NewChild;
+            }
         }
 
         this->reload();
+        this->count += NewChild->Count();
     }
 
     void DeleteNode(SimpleTreeNode *NodeToDelete) {
         if (NodeToDelete->Parent == nullptr) {
             this->Root = nullptr;
-            this->levels = 1;
+            this->levels = 0;
+            this->count = 0;
         } else {
             SimpleTreeNode *node = NodeToDelete->Parent;
             for (int i = 0; i < MAX_CHILD; i++) {
                 if (node->Children[i] == NodeToDelete) {
-                    for(int j = i; j < MAX_CHILD - 1; j++) {
+                    for (int j = i; j < MAX_CHILD - 1; j++) {
                         node->Children[j] = node->Children[j + 1];
                     }
                     node->Children[MAX_CHILD - 1] = nullptr;
                     this->reload();
+                    this->count -= NodeToDelete->Count();
                     break;
                 }
             }
@@ -134,7 +155,11 @@ public:
     }
 
     SimpleTreeNode **GetAllNodes() {
-        SimpleTreeNode **list = new SimpleTreeNode *[MAX_CHILD * this->levels];
+        SimpleTreeNode **list = new SimpleTreeNode *[this->Count() + 1];
+
+        for (int i = 0; i < this->Count() + 1; i++) {
+            list[i] = nullptr;
+        }
 
         if (this->Root != nullptr) {
             this->Root->GetAllNodes(list);
@@ -145,9 +170,12 @@ public:
 
     SimpleTreeNode **FindNodesByValue(int val) {
         SimpleTreeNode **list = this->GetAllNodes();
-        SimpleTreeNode **res_list = new SimpleTreeNode *[MAX_CHILD * this->levels];
+        SimpleTreeNode **res_list = new SimpleTreeNode *[this->Count()] + 1;
+        for (int i = 0; i < this->Count() + 1; i++) {
+            res_list[i] = nullptr;
+        }
         int k = 0;
-        for (int i = 0; i < MAX_CHILD * this->levels + 1; i++) {
+        for (int i = 0; i < this->Count(); i++) {
             if (list[i] != nullptr) {
                 if (list[i]->NodeValue == val) {
                     res_list[k++] = list[i];
@@ -169,14 +197,7 @@ public:
     }
 
     int Count() {
-        int res = 0;
-        SimpleTreeNode **list = this->GetAllNodes();
-        for (int i = 0; i < MAX_CHILD * this->levels + 1; i++) {
-            if (list[i] != nullptr) {
-                res++;
-            }
-        }
-        return res;
+        return this->count;
     }
 
     int LeafCount() {
