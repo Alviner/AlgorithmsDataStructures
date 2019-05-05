@@ -59,9 +59,7 @@ public:
             if (find->Node->NodeKey == key) {
                 find->NodeHasKey = true;
                 return find;
-            }
-
-            if (find->Node->NodeKey > key) {
+            } else if (find->Node->NodeKey > key) {
                 find->ToLeft = true;
                 if (find->Node->LeftChild == nullptr) {
                     return find;
@@ -85,10 +83,14 @@ public:
         if (find->NodeHasKey) {
             return false; // если ключ уже есть
         }
-        if (find->ToLeft) {
-            find->Node->LeftChild = node;
+        if (find->Node == nullptr) {
+            this->Root = node;
         } else {
-            find->Node->RightChild = node;
+            if (find->ToLeft) {
+                find->Node->LeftChild = node;
+            } else if (!find->ToLeft) {
+                find->Node->RightChild = node;
+            }
         }
         node->Parent = find->Node;
         return true;
