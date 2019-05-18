@@ -40,7 +40,7 @@ public:
     // true, если родительскому узлу надо добавить новый левым
     bool ToLeft;
 
-    BSTFind() { this->Node = nullptr; }
+    BSTFind() { this->Node = nullptr; this->NodeHasKey = false;}
 };
 
 class BST {
@@ -82,14 +82,14 @@ public:
         BSTFind *find = FindNodeByKey(key);
 
         if (find->Node != nullptr) {
-            if (find->NodeHasKey) {
+            if (find->NodeHasKey == true) {
                 return false; // если ключ уже есть
             }
 
-            if (find->ToLeft) {
+            if (find->ToLeft == true) {
                 find->Node->LeftChild = node;
             }
-            if (!find->ToLeft) {
+            if (find->ToLeft == false) {
                 find->Node->RightChild = node;
             }
             node->Parent = find->Node;
@@ -105,7 +105,7 @@ public:
         if (FromNode == nullptr) {
             return FromNode;
         }
-        if (FindMax) {
+        if (FindMax == true) {
             if (FromNode->RightChild != nullptr) {
                 return this->FinMinMax(FromNode->RightChild, FindMax);
             }
@@ -137,7 +137,7 @@ public:
                 if (find->Node->Parent == nullptr) {
                     this->Root = find->Node->LeftChild;
                 } else {
-                    if (find->ToLeft) {
+                    if (find->ToLeft == true) {
                         find->Node->Parent->LeftChild = find->Node->LeftChild;
                     } else {
                         find->Node->Parent->RightChild = find->Node->LeftChild;
@@ -147,7 +147,7 @@ public:
                 if (find->Node->Parent == nullptr) {
                     this->Root = nullptr;
                 } else {
-                    if (find->ToLeft) {
+                    if (find->ToLeft == true) {
                         find->Node->Parent->LeftChild = nullptr;
                     } else {
                         find->Node->Parent->RightChild = nullptr;
