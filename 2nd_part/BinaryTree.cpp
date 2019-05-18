@@ -40,7 +40,10 @@ public:
     // true, если родительскому узлу надо добавить новый левым
     bool ToLeft;
 
-    BSTFind() { this->Node = nullptr; this->NodeHasKey = false;}
+    BSTFind() {
+        this->Node = nullptr;
+        this->NodeHasKey = false;
+    }
 };
 
 class BST {
@@ -188,6 +191,80 @@ public:
 
     void print() {
         this->__print(this->Root, 0);
+    }
+
+    BSTNode **WideAllNodes() {
+        BSTNode **res = new BSTNode *[this->Count() + 1];
+        for (int i = 0; i < this->Count() + 1; i++) res[i] = nullptr;
+        int i = 0;
+        this->pasteNode(this->Root, res);
+        while (i < this->Count()) {
+            if (res[i]->LeftChild != nullptr) {
+                this->pasteNode(res[i]->LeftChild, res);
+            }
+            if (res[i]->RightChild != nullptr) {
+                this->pasteNode(res[i]->RightChild, res);
+            }
+            i++;
+        }
+
+        return res;
+    }
+
+    BSTNode **DeepAllNodes(int order) {
+        BSTNode **res = new BSTNode *[this->Count() + 1];
+        for (int i = 0; i < this->Count() + 1; i++) res[i] = nullptr;
+        switch (order) {
+            case 0:
+                this->inOrder(this->Root, res);
+                break;
+            case 1:
+                this->postOrder(this->Root, res);
+                break;
+            case 2:
+                this->preOrder(this->Root, res);
+                break;
+            default:
+                this->inOrder(this->Root, res);
+                break;
+        }
+
+        return res;
+    }
+
+private:
+    void postOrder(BSTNode *node, BSTNode **list) {
+        if (node != nullptr) {
+            this->postOrder(node->LeftChild, list);
+            this->postOrder(node->RightChild, list);
+            this->pasteNode(node, list);
+        }
+    }
+
+    void preOrder(BSTNode *node, BSTNode **list) {
+        if (node != nullptr) {
+            this->pasteNode(node, list);
+            this->preOrder(node->LeftChild, list);
+            this->preOrder(node->RightChild, list);
+        }
+    }
+
+    void inOrder(BSTNode *node, BSTNode **list) {
+        if (node != nullptr) {
+            this->inOrder(node->LeftChild, list);
+            this->pasteNode(node, list);
+            this->inOrder(node->RightChild, list);
+        }
+    }
+
+    void pasteNode(BSTNode *node, BSTNode **list) {
+        if (node != nullptr) {
+            int i = 0;
+            while (list[i] != nullptr) {
+                i++;
+            }
+            list[i] = node;
+        }
     }
 
 };
