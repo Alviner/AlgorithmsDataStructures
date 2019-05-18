@@ -123,23 +123,13 @@ public:
 
         if (find->NodeHasKey) {
             if (find->Node->RightChild != nullptr) {
-                find->Node->RightChild->Parent = find->Node->Parent;
-
                 BSTNode *min = this->FinMinMax(find->Node->RightChild, false);
                 if (min != nullptr) {
-                    if (find->Node->LeftChild != nullptr) {
-                        find->Node->LeftChild->Parent = min;
-                    }
-                    min->LeftChild = find->Node->LeftChild;
-                }
-
-                if (find->Node->Parent == nullptr) {
-                    this->Root = find->Node->RightChild;
-                } else {
-                    if (find->ToLeft) {
-                        find->Node->Parent->LeftChild = find->Node->RightChild;
-                    } else {
-                        find->Node->Parent->RightChild = find->Node->RightChild;
+                    int min_key = min->NodeKey;
+                    int min_value = min->NodeValue;
+                    if (this->DeleteNodeByKey(min_key)) {
+                        find->Node->NodeKey = min_key;
+                        find->Node->NodeValue = min_value;
                     }
                 }
             } else if (find->Node->LeftChild != nullptr) {
@@ -164,9 +154,8 @@ public:
                     }
                 }
             }
-            return true;
         }
-        return false; // если узел не найден
+        return find->NodeHasKey;
     }
 
     int Count() {
@@ -174,6 +163,31 @@ public:
             return 0;
         }
         return this->Root->Count(); // количество узлов в дереве
+    }
+
+    void __print(BSTNode *root, int space = 0) {
+        // Base case
+        if (root == nullptr)
+            return;
+
+        // Increase distance between levels
+        space += 10;
+
+        // Process right child first
+        __print(root->RightChild, space);
+
+        // Print current node after space
+        // count
+        printf("\n");
+        for (int i = 10; i < space; i++)
+            printf(" ");
+        printf("%d\n", root->NodeKey);
+
+        __print(root->LeftChild, space);
+    }
+
+    void print() {
+        this->__print(this->Root, 0);
     }
 
 };
