@@ -59,8 +59,6 @@ public:
     }
 
     bool IsBalanced(BSTNode *root_node) {
-        printf("%d\n", this->MaxLevel(this->Root));
-
         int left_max = 0;
         int right_max = 0;
         if (root_node != nullptr) {
