@@ -21,7 +21,7 @@ int _count_item(int *list, int start, int end, int item) {
 }
 
 partQuicksort _part_quicksort(int *list, int left, int right) {
-    partQuicksort res{0, 0};
+    partQuicksort res = {0, 0};
     int first_index = left;
     int second_index = right;
 
