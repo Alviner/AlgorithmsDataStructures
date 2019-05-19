@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 struct partQuicksort {
     int sep;
     int pivots;
