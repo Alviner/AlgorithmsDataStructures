@@ -207,4 +207,42 @@ public:
         }
         return this->Root->LeavesNumber();
     }
+
+    SimpleTreeNode **EvenTrees() {
+        // возвращает массив узлов,
+        // который завершается NULL-ом
+        SimpleTreeNode **res = new SimpleTreeNode *[this->Count() * 2 + 1];
+        for (int i = 0; i < this->Count() * 2 + 1; i++) {
+            res[i] = nullptr;
+        }
+        if (this->Root != nullptr) {
+            this->FindPairNodes4Delete(res, this->Root);
+        }
+        return res;
+    }
+
+private:
+    void FindPairNodes4Delete(SimpleTreeNode **even, SimpleTreeNode *node) {
+        for (int i = 0; i < MAX_CHILD; i++) {
+            if (node->Children[i] == nullptr) {
+                return;
+            }
+            if (node->Children[i]->Count() % 2 == 0) {
+                this->PasteNode(even, node->Children[i]);
+            } else {
+                this->FindPairNodes4Delete(even, node->Children[i]);
+            }
+        }
+    }
+
+    void PasteNode(SimpleTreeNode **arr, SimpleTreeNode *node) {
+        for (int i = 0; i < this->Count() * 2 + 1; i++) {
+            if (arr[i] == nullptr) {
+                arr[i] = node->Parent;
+                arr[i + 1] = node;
+                return;
+            }
+        }
+    }
+
 };
