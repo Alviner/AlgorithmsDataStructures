@@ -182,6 +182,28 @@ public:
         return res;
     }
 
+    bool HasIndex(int *adj, int index) {
+        int i = 0;
+        while (adj[i] != -1) {
+            if (adj[i] == index) {
+                return true;
+            }
+            i++;
+        }
+        return false;
+    }
+
+    int GetUnvisitedIndex(int *adj) {
+        int i = 0;
+        while (adj[i] != -1) {
+            if (this->GetVertex(adj[i])->is_visited() == false) {
+                return adj[i];
+            }
+            i++;
+        }
+        return -1;
+    }
+
     Vertex *GetVertex(int index) {
         if (index < 0 or index >= this->max_vertex or this->vertex[index].Value == 0) {
             return nullptr;
@@ -220,46 +242,30 @@ public:
         int current_index = VFrom;
         while (this->GetVertex(current_index) != nullptr) {
             if (this->GetVertex(current_index)->is_visited() == false) {
-                this->stack->push(current_index);
                 this->GetVertex(current_index)->set_visited();
+                this->stack->push(current_index);
             }
 
             adjacent = this->GetAdjacent(current_index);
-            ad_length = 0;
-            while (adjacent[ad_length] != -1) {
-                if (VTo == adjacent[ad_length]) {
-                    this->stack->push(adjacent[ad_length]);
-                    current_index = -1;
-                    break;
-                }
-                ad_length++;
-            }
-
-            if (current_index == -1) {
+            if (this->HasIndex(adjacent, VTo)) {
+                this->stack->push(VTo);
+                current_index = -1;
                 continue;
-            }
-
-            if (ad_length == 0) {
-                res = new Vertex *[1];
-                res[0] = nullptr;
-                return res;
-            }
-
-            k = 0;
-            while (adjacent[k] != -1) {
-                if (this->GetVertex(adjacent[k])->is_visited() == false) {
-                    current_index = adjacent[k];
-                    break;
-                }
-
-                if (k == ad_length - 1) {
-                    current_index = this->stack->pop();
+            } else {
+                int unvisited_index = this->GetUnvisitedIndex(adjacent);
+                if (unvisited_index != -1) {
+                    current_index = unvisited_index;
+                    continue;
+                } else {
+                    this->stack->pop();
                     if (this->stack->size() == 0) {
-                        current_index = -1;
+                        break;
+                    } else {
+                        current_index = this->stack->peek();
+                        this->GetVertex(current_index)->set_visited();
+                        continue;
                     }
-                    break;
                 }
-                k++;
             }
 
         }
