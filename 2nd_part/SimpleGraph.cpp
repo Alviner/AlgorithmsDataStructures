@@ -240,34 +240,26 @@ public:
         }
 
         int current_index = VFrom;
-        while (this->GetVertex(current_index) != nullptr) {
-            if (this->GetVertex(current_index)->is_visited() == false) {
-                this->GetVertex(current_index)->set_visited();
-                this->stack->push(current_index);
-            }
+        this->GetVertex(current_index)->set_visited();
+        this->stack->push(current_index);
+
+        while (this->stack->size() > 0) {
+            current_index = this->stack->peek();
 
             adjacent = this->GetAdjacent(current_index);
+
             if (this->HasIndex(adjacent, VTo)) {
                 this->stack->push(VTo);
-                current_index = -1;
-                continue;
-            } else {
-                int unvisited_index = this->GetUnvisitedIndex(adjacent);
-                if (unvisited_index != -1) {
-                    current_index = unvisited_index;
-                    continue;
-                } else {
-                    this->stack->pop();
-                    if (this->stack->size() == 0) {
-                        break;
-                    } else {
-                        current_index = this->stack->peek();
-                        this->GetVertex(current_index)->set_visited();
-                        continue;
-                    }
-                }
+                break;
             }
 
+            int unvisited = this->GetUnvisitedIndex(adjacent);
+            if (unvisited != -1) {
+                this->GetVertex(unvisited)->set_visited();
+                this->stack->push(unvisited);
+            } else {
+                this->stack->pop();
+            }
         }
 
         res = new Vertex *[this->stack->size() + 1];
