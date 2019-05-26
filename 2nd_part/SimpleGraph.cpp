@@ -29,10 +29,10 @@ public:
 };
 
 struct Node {
-    Vertex *val;
+    int val;
     Node *prev;
 
-    Node(Vertex *value) {
+    Node(int value) {
         this->prev = nullptr;
         this->val = value;
     }
@@ -66,15 +66,15 @@ public:
         return this->stacksize;
     }
 
-    Vertex *pop() {
-        if (this->list->head == nullptr) return nullptr;
-        Vertex *value = this->list->head->val;
+    int pop() {
+        if (this->list->head == nullptr) return -1;
+        int value = this->list->head->val;
         this->list->head = this->list->head->prev;
         --this->stacksize;
         return value;
     }
 
-    void push(Vertex *val) {
+    void push(int val) {
         Node *node = new Node(val);
         if (this->list->head == nullptr) {
             this->list->head = node;
@@ -86,11 +86,11 @@ public:
         ++this->stacksize;
     }
 
-    Vertex *peek() {
+    int peek() {
         if (this->list->head != nullptr) {
             return this->list->head->val;
         } else
-            return nullptr;
+            return -1;
     }
 };
 
@@ -112,8 +112,8 @@ public:
     }
 
     void AddVertex(int value) {
-        // ваш код добавления новой вершины 
-        // с значением value 
+        // ваш код добавления новой вершины
+        // с значением value
         // в свободную позицию массива vertex
         int i = 0;
 
@@ -170,16 +170,33 @@ public:
         this->m_adjacency[v2][v1] = 0;
     }
 
-    Vertex **GetAdjacent(int vertex_index) {
-        Vertex **res = new Vertex *[this->max_vertex];
-        for (int i = 0; i < this->max_vertex; i++) res[i] = nullptr;
+    int *GetAdjacent(int vertex_index) {
+        int *res = new int[this->max_vertex + 1];
+        for (int i = 0; i <= this->max_vertex; i++) res[i] = -1;
         int k = 0;
         for (int i = 0; i < this->max_vertex; i++) {
-            if (&this->vertex[i] != vertex && this->IsEdge(i, vertex_index)) {
-                res[k++] = &this->vertex[i];
+            if (i != vertex_index && this->IsEdge(i, vertex_index)) {
+                res[k++] = i;
             }
         }
         return res;
+    }
+
+    Vertex *GetVertex(int index) {
+        if (index < 0 or index >= this->max_vertex or this->vertex[index].Value == 0) {
+            return nullptr;
+        }
+        return &this->vertex[index];
+    }
+
+    int GetVertexIndex(Vertex *vertex) {
+        int i = 0;
+        while (i < this->max_vertex) {
+            if (&this->vertex[i] == vertex) {
+                return i;
+            }
+            i++;
+        }
     }
 
     Vertex **DepthFirstSearch(int VFrom, int VTo) {
@@ -189,6 +206,9 @@ public:
 
         Vertex **res;
 
+        int *adjacent;
+        int ad_length, k;
+
         while (this->stack->size() > 0) {
             this->stack->pop();
         }
@@ -197,54 +217,51 @@ public:
             this->vertex[i].set_unvisited();
         }
 
-        Vertex *current = &this->vertex[VFrom];
-
-        while (current != nullptr) {
-            if (current->is_visited() == false) {
-                this->stack->push(current);
-                current->set_visited();
+        int current_index = VFrom;
+        while (this->GetVertex(current_index) != nullptr) {
+            if (this->GetVertex(current_index)->is_visited() == false) {
+                this->stack->push(current_index);
+                this->GetVertex(current_index)->set_visited();
             }
 
-            int curr_index = 0;
-            while (&this->vertex[curr_index] != current) {
-                curr_index++;
+            adjacent = this->GetAdjacent(current_index);
+            ad_length = 0;
+            while (adjacent[ad_length] != -1) {
+                if (VTo == adjacent[ad_length]) {
+                    this->stack->push(adjacent[ad_length]);
+                    current_index = -1;
+                    break;
+                }
+                ad_length++;
             }
 
-            Vertex **adjacent = this->GetAdjacent(curr_index);
-            int ad_lenght = 0;
-            while (adjacent[ad_lenght] != nullptr) {
-                ad_lenght++;
+            if (current_index == -1) {
+                continue;
             }
-            if (ad_lenght == 0) {
+
+            if (ad_length == 0) {
                 res = new Vertex *[1];
                 res[0] = nullptr;
                 return res;
             }
-            bool secondInAdj = false;
-            for (int i = 0; i < ad_lenght; i++) {
-                if (adjacent[i] == &this->vertex[VTo]) {
-                    this->stack->push(&this->vertex[VTo]);
-                    current = nullptr;
-                    secondInAdj = true;
+
+            k = 0;
+            while (adjacent[k] != -1) {
+                if (this->GetVertex(adjacent[k])->is_visited() == false) {
+                    current_index = adjacent[k];
+                    break;
                 }
+
+                if (k == ad_length - 1) {
+                    current_index = this->stack->pop();
+                    if (this->stack->size() == 0) {
+                        current_index = -1;
+                    }
+                    break;
+                }
+                k++;
             }
 
-            if (secondInAdj == false) {
-                for (int i = 0; i < ad_lenght; ++i) {
-                    if (adjacent[i]->is_visited() == false) {
-                        current = adjacent[i];
-                        break;
-                    }
-
-                    if (i == ad_lenght - 1) {
-                        current = this->stack->pop();
-                        if (this->stack->size() == 0) {
-                            current = nullptr;
-                        }
-                        break;
-                    }
-                }
-            }
         }
 
         res = new Vertex *[this->stack->size() + 1];
@@ -252,8 +269,8 @@ public:
             res[j] = nullptr;
         }
         int j = this->stack->size() - 1;
-        while(this->stack->size() > 0) {
-            res[j--] = this->stack->pop();
+        while (this->stack->size() > 0) {
+            res[j--] = this->GetVertex(this->stack->pop());
         }
 
         return res;
