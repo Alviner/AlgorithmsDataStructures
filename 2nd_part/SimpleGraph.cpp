@@ -6,7 +6,7 @@ public:
     bool Hit;
 
     Vertex() {
-        this->Value = 0;
+        this->Value = -1;
         this->set_unvisited();
     }
 
@@ -117,7 +117,7 @@ public:
         // в свободную позицию массива vertex
         int i = 0;
 
-        while (i < this->max_vertex && this->vertex[i].Value != 0) {
+        while (i < this->max_vertex && this->vertex[i].Value >= 0) {
             i++;
         }
         if (i >= max_vertex) {
@@ -151,7 +151,7 @@ public:
         // true если есть ребро между вершинами v1 и v2
         if (v1 < 0 || v2 < 0 || v1 >= max_vertex || v2 >= max_vertex)
             return false;
-        return this->m_adjacency[v1][v2] == 1 && this->m_adjacency[v2][v1] == 1;
+        return this->m_adjacency[v1][v2] == 1;
     }
 
     void AddEdge(int v1, int v2) {
@@ -205,7 +205,7 @@ public:
     }
 
     Vertex *GetVertex(int index) {
-        if (index < 0 or index >= this->max_vertex or this->vertex[index].Value == 0) {
+        if (index < 0 or index >= this->max_vertex or this->vertex[index].Value < 0) {
             return nullptr;
         }
         return &this->vertex[index];
