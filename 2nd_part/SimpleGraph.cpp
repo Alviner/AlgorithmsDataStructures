@@ -31,9 +31,11 @@ public:
 struct Node {
     int val;
     Node *prev;
+    Node *next;
 
     Node(int value) {
         this->prev = nullptr;
+        this->next = nullptr;
         this->val = value;
     }
 };
@@ -94,12 +96,55 @@ public:
     }
 };
 
+
+class Queue {
+public:
+    List *list;
+    int queuesize;
+
+    Queue() {
+        this->list = new List();
+        this->queuesize = 0;
+    }
+
+    void enqueue(int item) {
+        Node *node = new Node(item);
+        if (this->list->head == nullptr) {
+            this->list->head = node;
+        } else {
+            this->list->tail->next = node;
+        }
+        this->list->tail = node;
+        this->list->tail->next = nullptr;
+        ++this->queuesize;
+    }
+
+    int dequeue() {
+        Node *node = this->list->head;
+        if (this->list->head == nullptr) return -1;
+        this->list->head = node->next;
+        --this->queuesize;
+        return node->val;
+    }
+
+    int size() {
+        return this->queuesize;
+    }
+
+    void rotate(int N) {
+        for (int i = 0; i < N; ++i) {
+            this->enqueue(this->dequeue());
+        }
+    }
+};
+
 class SimpleGraph {
 public:
     Vertex *vertex;
     int **m_adjacency;
     int max_vertex;
     Stack *stack;
+    Queue *queue;
 
     SimpleGraph(int size) {
         this->max_vertex = size;
@@ -109,6 +154,7 @@ public:
         this->vertex = new Vertex[size];
 
         this->stack = new Stack();
+        this->queue = new Queue();
     }
 
     void AddVertex(int value) {
@@ -219,6 +265,7 @@ public:
             }
             i++;
         }
+        return -1;
     }
 
     Vertex **DepthFirstSearch(int VFrom, int VTo) {
@@ -229,7 +276,6 @@ public:
         Vertex **res;
 
         int *adjacent;
-        int ad_length, k;
 
         while (this->stack->size() > 0) {
             this->stack->pop();
@@ -271,6 +317,69 @@ public:
             res[j--] = this->GetVertex(this->stack->pop());
         }
 
+        return res;
+    }
+
+    Vertex **BreadthFirstSearch(int VFrom, int VTo) {
+        // Узлы задаются позициями в списке vertex.
+        // Возвращается список узлов -- путь из VFrom в VTo.
+        // Список пустой, если пути нету.
+        // Список завершается NULL-ом
+
+        Vertex **res;
+
+        int *adjacent;
+        int unvisited;
+        int *parents = new int[this->max_vertex];
+
+        Queue *res_queue = new Queue();
+
+        for (int i = 0; i < this->max_vertex; i++) {
+            parents[i] = -1;
+        }
+
+        while(this->queue->size() > 0) {
+            this->queue->dequeue();
+        }
+
+        for (int i = 0; i < this->max_vertex; i++) {
+            this->vertex[i].set_unvisited();
+        }
+
+        int current_index = VFrom;
+        this->queue->enqueue(current_index);
+
+        while(this->queue->size() > 0) {
+            current_index = this->queue->dequeue();
+            this->GetVertex(current_index)->set_visited();
+
+            if (current_index == VTo) {
+                while(current_index != -1) {
+                    res_queue->enqueue(current_index);
+                    current_index = parents[current_index];
+                }
+                break;
+            } else {
+                adjacent = this->GetAdjacent(current_index);
+                unvisited = this->GetUnvisitedIndex(adjacent);
+
+                while(unvisited != -1) {
+                    this->queue->enqueue(unvisited);
+                    this->GetVertex(unvisited)->set_visited();
+                    parents[unvisited] = current_index;
+                    unvisited = this->GetUnvisitedIndex(adjacent);
+                }
+            }
+        }
+
+        res = new Vertex *[res_queue->size() + 1];
+        for (int j = 0; j < res_queue->size() + 1; ++j) {
+            res[j] = nullptr;
+        }
+        int j = res_queue->size();
+        while (res_queue->size() > 0) {
+            res[--j] = this->GetVertex(res_queue->dequeue());
+        }
         return res;
     }
 };
