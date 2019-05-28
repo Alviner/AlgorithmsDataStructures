@@ -409,7 +409,6 @@ public:
                     while(adjacent[k] != -1 && !has_triangle) {
                         if (this->IsEdge(adjacent[j], adjacent[k])) {
                             has_triangle = true;
-                            break;
                         }
                         k++;
                     }
