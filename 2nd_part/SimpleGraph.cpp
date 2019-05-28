@@ -140,7 +140,7 @@ public:
 
 class SimpleGraph {
 public:
-    Vertex *vertex;
+    Vertex **vertex;
     int **m_adjacency;
     int max_vertex;
     Stack *stack;
@@ -149,9 +149,11 @@ public:
     SimpleGraph(int size) {
         this->max_vertex = size;
         this->m_adjacency = new int *[size];
-        for (int i = 0; i < size; i++)
+        this->vertex = new Vertex*[size];
+        for (int i = 0; i < size; i++) {
             this->m_adjacency[i] = new int[size];
-        this->vertex = new Vertex[size];
+            this->vertex[i] = nullptr;
+        }
 
         this->stack = new Stack();
         this->queue = new Queue();
@@ -163,13 +165,13 @@ public:
         // в свободную позицию массива vertex
         int i = 0;
 
-        while (i < this->max_vertex && this->vertex[i].Value >= 0) {
+        while (i < this->max_vertex && this->vertex[i] != nullptr) {
             i++;
         }
         if (i >= max_vertex) {
             return;
         }
-        this->vertex[i] = Vertex(value);
+        this->vertex[i] = new Vertex(value);
 
         for (int j = 0; j < max_vertex; ++j) {
             this->m_adjacency[i][j] = 0;
@@ -190,7 +192,7 @@ public:
             this->m_adjacency[j][v] = 0;
         }
 
-        this->vertex[v] = Vertex();
+        this->vertex[v] = nullptr;
     }
 
     bool IsEdge(int v1, int v2) {
@@ -251,16 +253,16 @@ public:
     }
 
     Vertex *GetVertex(int index) {
-        if (index < 0 or index >= this->max_vertex or this->vertex[index].Value < 0) {
+        if (index < 0 or index >= this->max_vertex) {
             return nullptr;
         }
-        return &this->vertex[index];
+        return this->vertex[index];
     }
 
     int GetVertexIndex(Vertex *vertex) {
         int i = 0;
         while (i < this->max_vertex) {
-            if (&this->vertex[i] == vertex) {
+            if (this->vertex[i] == vertex) {
                 return i;
             }
             i++;
@@ -282,7 +284,7 @@ public:
         }
 
         for (int i = 0; i < this->max_vertex; i++) {
-            this->vertex[i].set_unvisited();
+            this->vertex[i]->set_unvisited();
         }
 
         int current_index = VFrom;
@@ -343,7 +345,7 @@ public:
         }
 
         for (int i = 0; i < this->max_vertex; i++) {
-            this->vertex[i].set_unvisited();
+            this->vertex[i]->set_unvisited();
         }
 
         int current_index = VFrom;
@@ -382,4 +384,43 @@ public:
         }
         return res;
     }
+
+
+    Vertex **WeakVertices() {
+        // Возвращает список узлов вне треугольников
+        // Список пустой, если пути нету.
+        // Список завершается NULL-ом
+        Vertex **res = new Vertex *[this->max_vertex + 1];
+        for (int j = 0; j < this->max_vertex + 1; ++j) {
+            res[j] = nullptr;
+        }
+        int res_count = 0;
+        int *adjacent;
+        int ad;
+
+        for (int i = 0; i < this->max_vertex; ++i) {
+            if (this->vertex[i] != nullptr) {
+                adjacent = this->GetAdjacent(i);
+
+                int j = 0;
+                bool has_triangle = false;
+                while (adjacent[j] != -1 && !has_triangle) {
+                    int k = j + 1;
+                    while(adjacent[k] != -1 && !has_triangle) {
+                        if (this->IsEdge(adjacent[j], adjacent[k])) {
+                            has_triangle = true;
+                            break;
+                        }
+                        k++;
+                    }
+                    j++;
+                }
+                if (has_triangle == false) {
+                    res[res_count++] = this->vertex[i];
+                }
+            }
+        }
+        return res;
+    }
+
 };
